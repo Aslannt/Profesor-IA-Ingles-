@@ -157,7 +157,11 @@ class Transcriptor:
         try:
             from faster_whisper import WhisperModel
         except ImportError as exc:
-            raise TranscriberError("faster-whisper no está instalado.") from exc
+            if "Control de aplicaciones" in str(exc) or "Application Control" in str(exc):
+                raise TranscriberError(
+                    "Windows (Smart App Control) bloqueó una librería de Whisper. Instala las mismas versiones "
+                    f"que usa el Copiloto o desactiva Smart App Control. Detalle: {exc}") from exc
+            raise TranscriberError(f"No se pudo cargar faster-whisper: {exc}") from exc
         self._model = WhisperModel(self.modelo, device=device, compute_type=compute_type, cpu_threads=0, num_workers=1)
 
     def transcribir(self, audio_16k: np.ndarray, idioma: str) -> Transcripcion:
