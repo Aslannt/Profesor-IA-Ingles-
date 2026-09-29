@@ -4,24 +4,32 @@ title Profesora de Ingles - Instalacion del servidor
 cd /d "%~dp0"
 
 rem Instala el servidor de la profesora en ESTE PC (el de la RTX 3060).
-rem Mismo Python que el Copiloto de Reuniones (3.11).
 
-where py >nul 2>nul
-if errorlevel 1 (
-    echo No se encontro Python. Instala Python 3.11 desde https://www.python.org/downloads/
+rem Busca un Python compatible (3.11 a 3.14), prefiriendo las versiones mas probadas.
+set "PY="
+for %%v in (3.12 3.11 3.13 3.14) do (
+    if not defined PY (
+        py -%%v -c "print(1)" >nul 2>nul && set "PY=py -%%v"
+    )
+)
+if not defined PY (
+    python -c "import sys; sys.exit(0 if (3,11) <= sys.version_info[:2] <= (3,14) else 1)" >nul 2>nul && set "PY=python"
+)
+if not defined PY (
+    echo No encontre un Python compatible ^(se necesita 3.11, 3.12, 3.13 o 3.14^).
+    echo Versiones que tiene este PC:
+    py -0 2>nul
+    python --version 2>nul
+    echo Instala Python 3.12 desde https://www.python.org/downloads/ y vuelve a ejecutar este archivo.
     pause
     exit /b 1
 )
-py -3.11 -c "print(1)" >nul 2>nul
-if errorlevel 1 (
-    echo No se encontro Python 3.11. Instalalo desde https://www.python.org/downloads/
-    pause
-    exit /b 1
-)
+echo Usando:
+%PY% --version
 
 if not exist ".venv" (
     echo Creando entorno virtual...
-    py -3.11 -m venv .venv
+    %PY% -m venv .venv
 )
 call .venv\Scripts\activate
 python -m pip install --upgrade pip >nul
