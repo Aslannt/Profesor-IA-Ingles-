@@ -108,6 +108,15 @@ La app de la laptop tiene su propia configuración en `%LOCALAPPDATA%\ProfesoraD
 - **Clase y reunión al mismo tiempo**: comparten `qwen3.5:9b`, así que Ollama no tiene que cambiar de modelo.
 - Registros: `logs/servidor.log` en el PC y `%LOCALAPPDATA%\ProfesoraDeIngles\logs\cliente.log` en la laptop.
 
+## Diseño
+
+La app sigue la guía de estilo tipo Apple (`profesora/cliente/tema.py` tiene todos los tokens):
+un solo color de acción (azul `#0066cc`: todo lo que se toca es azul), superficies que alternan
+blanco / parchment / casi negro en vez de bordes y sombras, píldoras para las acciones, y la tipografía
+Inter Display + Inter (el reemplazo libre de SF Pro; incluida en `assets/fuentes`, licencia OFL).
+La única excepción es el verde/ámbar/rojo de la calificación de pronunciación.
+Para agrandar todo (letra, botones, espacios) sube `tamano_letra` en `cliente.json` (17 = tamaño de la guía).
+
 ## Estructura
 
 ```
@@ -122,7 +131,8 @@ profesora/almacen.py         progreso y clases (fuente de verdad, en datos/)
 profesora/obsidian.py        notas en el vault
 profesora/protocolo.py       formato de los mensajes
 profesora/descubrimiento.py  encontrar el PC en la red (UDP)
-profesora/cliente/           app de la laptop: motor.py (red, micrófono, parlante) y ventana.py (PySide6)
+profesora/cliente/           app de la laptop: motor.py (red, micrófono, parlante), ventana.py (PySide6), tema.py (diseño)
+assets/                      fuentes Inter (OFL) e íconos Feather (MIT)
 packaging/                   PyInstaller + Inno Setup
 tests/                       pruebas (incluida una clase completa servidor↔cliente)
 ```

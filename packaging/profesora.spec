@@ -9,7 +9,7 @@ from PyInstaller.utils.hooks import collect_all
 
 PROJECT = Path(SPECPATH).parent
 
-datas = []
+datas = [(str(PROJECT / "assets"), "assets")]  # fuentes Inter e íconos
 cliente_json = PROJECT / "config" / "cliente.json"  # lo pone construir_instalador_mama.ps1
 if cliente_json.exists():
     datas.append((str(cliente_json), "config"))
