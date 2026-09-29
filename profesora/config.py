@@ -81,7 +81,10 @@ class ConfigServidor:
     motor_voz: str = "edge"
     voz_espanol: str = "es-CO-SalomeNeural"
     voz_ingles: str = "en-US-JennyNeural"
-    velocidad_ingles: str = "-15%"
+    velocidad_ingles: str = "-5%"
+    # Para que suene animada y no aburrida: un poco más rápida y aguda que la voz por defecto.
+    velocidad_espanol: str = "+10%"
+    tono_espanol: str = "+4Hz"
     kokoro_voz_espanol: str = "ef_dora"
     kokoro_voz_ingles: str = "af_heart"
 
@@ -112,9 +115,9 @@ class ConfigCliente:
     bloque_segundos: float = 0.1
     # Umbral de volumen para considerar que está hablando, y cuánto silencio
     # esperar para saber que terminó (un aprendiz hace pausas largas pensando).
-    umbral_voz: float = 0.012
-    silencio_fin_segundos: float = 1.6
-    silencio_fin_practica_segundos: float = 1.2
+    umbral_voz: float = 0.007
+    silencio_fin_segundos: float = 1.3
+    silencio_fin_practica_segundos: float = 0.9
     espera_maxima_segundos: float = 10.0
     frase_maxima_segundos: float = 30.0
 

@@ -58,13 +58,16 @@ class Voz:
         if not segmentos:
             return np.zeros(0, dtype=np.float32)
         pausa = np.zeros(int(FRECUENCIA_VOZ * 0.12), dtype=np.float32)
+        if self.config.motor_voz == "kokoro":
+            audios = [self._kokoro_voz(idioma, t, despacio) for idioma, t in segmentos]
+        else:
+            # Cada trozo es una petición por internet: se piden todas a la vez (antes era una tras otra).
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=6) as grupo:
+                audios = list(grupo.map(lambda s: self._edge(s[0], s[1], despacio), segmentos))
         partes = []
-        for idioma, t in segmentos:
-            if self.config.motor_voz == "kokoro":
-                partes.append(self._kokoro_voz(idioma, t, despacio))
-            else:
-                partes.append(self._edge(idioma, t, despacio))
-            partes.append(pausa)
+        for audio in audios:
+            partes += [audio, pausa]
         return np.concatenate(partes)
 
     # ------------------------------------------------------------ Edge (voces neuronales de Microsoft)
@@ -73,13 +76,14 @@ class Voz:
         import edge_tts
 
         if idioma == "en":
-            voz, velocidad = self.config.voz_ingles, ("-35%" if despacio else self.config.velocidad_ingles)
+            voz, velocidad, tono = self.config.voz_ingles, ("-30%" if despacio else self.config.velocidad_ingles), "+0Hz"
         else:
-            voz, velocidad = self.config.voz_espanol, ("-10%" if despacio else "+0%")
+            voz, velocidad, tono = self.config.voz_espanol, ("-5%" if despacio else self.config.velocidad_espanol), \
+                self.config.tono_espanol
 
         async def _descargar() -> bytes:
             audio = bytearray()
-            async for trozo in edge_tts.Communicate(texto, voz, rate=velocidad).stream():
+            async for trozo in edge_tts.Communicate(texto, voz, rate=velocidad, pitch=tono).stream():
                 if trozo["type"] == "audio":
                     audio.extend(trozo["data"])
             return bytes(audio)

@@ -163,7 +163,7 @@ class SesionClase:
         frase = self.practica_actual
         self.evento(p.EV_ESTADO, estado="entendiendo", mensaje="Escuchando lo que dijiste…")
         try:
-            oido = self.m.transcriptor.transcribir(audio, "en" if frase else "es")
+            oido = self.m.transcriptor.transcribir(audio, "en" if frase else "es", corto=bool(frase))
         except Exception:
             logger.exception("Falló la transcripción")
             self.evento(p.EV_ERROR, mensaje="No pude entender el audio. Intenta otra vez.")

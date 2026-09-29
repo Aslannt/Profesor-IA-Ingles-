@@ -164,7 +164,9 @@ class Transcriptor:
             raise TranscriberError(f"No se pudo cargar faster-whisper: {exc}") from exc
         self._model = WhisperModel(self.modelo, device=device, compute_type=compute_type, cpu_threads=0, num_workers=1)
 
-    def transcribir(self, audio_16k: np.ndarray, idioma: str) -> Transcripcion:
+    def transcribir(self, audio_16k: np.ndarray, idioma: str, corto: bool = False) -> Transcripcion:
+        """`corto=True` en la práctica: la app ya recortó la frase, así que no se filtra con VAD ni
+        se descarta por "poca voz" (eso se tragaba palabras cortas como "hi")."""
         # Ojo: a propósito NO se le da a Whisper la frase esperada como pista (initial_prompt):
         # lo empujaría a "oír" la frase correcta aunque la pronunciación no lo fuera.
         self.load()
@@ -175,8 +177,8 @@ class Transcriptor:
             segmentos, _ = self._model.transcribe(
                 audio,
                 language=idioma,
-                beam_size=5,
-                vad_filter=True,
+                beam_size=1 if not corto else 3,  # igual que el Copiloto: rápido
+                vad_filter=not corto,
                 condition_on_previous_text=False,
                 word_timestamps=True,
                 temperature=0.0,
@@ -185,7 +187,7 @@ class Transcriptor:
             for s in segmentos:
                 if not s.text.strip():
                     continue
-                if s.no_speech_prob > self.NO_SPEECH_PROB_LIMIT or s.compression_ratio > self.COMPRESSION_RATIO_LIMIT:
+                if (not corto and s.no_speech_prob > self.NO_SPEECH_PROB_LIMIT) or s.compression_ratio > self.COMPRESSION_RATIO_LIMIT:
                     continue
                 textos.append(s.text.strip())
                 palabras += [Palabra(w.word.strip(), float(w.probability)) for w in (s.words or []) if w.word.strip()]

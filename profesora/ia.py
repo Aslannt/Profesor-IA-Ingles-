@@ -24,7 +24,7 @@ class IA:
 
     def responder(self, sistema: str, mensajes: list[dict]) -> str:
         """Siguiente intervención de la profesora."""
-        texto = self._llamar(sistema, mensajes, 700, None)
+        texto = self._llamar(sistema, mensajes, 300, None)
         if not texto:
             raise ErrorIA("La profesora se quedó en blanco. Intenta otra vez.")
         return texto

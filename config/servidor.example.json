@@ -17,7 +17,9 @@
   "motor_voz": "edge",
   "voz_espanol": "es-CO-SalomeNeural",
   "voz_ingles": "en-US-JennyNeural",
-  "velocidad_ingles": "-15%",
+  "velocidad_ingles": "-5%",
+  "velocidad_espanol": "+10%",
+  "tono_espanol": "+4Hz",
 
   "obsidian_vault_path": "C:\\Users\\Aslan\\Documents\\Vault Personal",
   "obsidian_carpeta": "Inglés Katerin",

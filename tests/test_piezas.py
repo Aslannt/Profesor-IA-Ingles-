@@ -53,7 +53,7 @@ def test_detector_frase_termina_tras_silencio():
         if terminado:
             break
     assert terminado and d.audio() is not None
-    assert 1.0 < len(d.audio()) / 48000 < 2.5
+    assert 1.0 < len(d.audio()) / 48000 < 3.0  # habla + silencio final + 0.5 s de audio previo
 
 
 def test_detector_frase_se_rinde_si_no_habla():

@@ -47,7 +47,7 @@ class OidoFalso:
     def load(self):
         pass
 
-    def transcribir(self, audio, idioma):
+    def transcribir(self, audio, idioma, corto=False):
         if idioma == "en":
             return Transcripcion("nice to mit you", [Palabra("nice", .9), Palabra("to", .9), Palabra("mit", .4),
                                                       Palabra("you", .9)])

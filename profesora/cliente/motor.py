@@ -209,7 +209,7 @@ class DetectorFrase:
         if not self.hablando:
             if self.transcurrido <= 0.3:
                 self.ruido.append(nivel)
-            self.previo = (self.previo + [bloque])[-3:]
+            self.previo = (self.previo + [bloque])[-5:]
             if nivel >= self.umbral and self.transcurrido > 0.3:
                 self.hablando = True
                 self.frase = list(self.previo)
