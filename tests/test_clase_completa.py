@@ -69,10 +69,10 @@ def puerto_libre():
 def entorno(tmp_path):
     puerto = puerto_libre()
     config = ConfigServidor(carpeta_datos=str(tmp_path / "datos"), obsidian_vault_path=str(tmp_path / "vault"),
-                            server_port=puerto, server_token="secreto")
+                            server_port=puerto)
     ia = IAFalsa()
     motores = Motores(config, ia=ia, transcriptor=OidoFalso(), voz=VozFalsa())
-    servidor = ServidorProfesora(motores, "127.0.0.1", puerto, "secreto")
+    servidor = ServidorProfesora(motores, "127.0.0.1", puerto)
     listo = threading.Event()
     threading.Thread(target=servidor.servir, args=(listo,), daemon=True).start()
     assert listo.wait(5)
@@ -80,9 +80,9 @@ def entorno(tmp_path):
     servidor.detener()
 
 
-def cliente(puerto, token="secreto"):
+def cliente(puerto):
     eventos, conexiones = queue.Queue(), queue.Queue()
-    c = Conexion(ConfigCliente(remote_server_url=f"ws://127.0.0.1:{puerto}", remote_token=token),
+    c = Conexion(ConfigCliente(remote_server_url=f"ws://127.0.0.1:{puerto}"),
                  eventos.put, lambda a, f: eventos.put({"evento": "_audio", "muestras": len(a), "frecuencia": f}),
                  lambda ok, msg: conexiones.put((ok, msg)))
     c.iniciar()
@@ -170,14 +170,6 @@ def test_se_retoma_la_clase_si_se_cae_la_conexion(entorno):
     c2.cerrar()
 
 
-def test_token_incorrecto_no_entra(entorno):
-    puerto, *_ = entorno
-    c, eventos, conexiones = cliente(puerto, token="malo")
-    ok, mensaje = conexiones.get(timeout=5)
-    assert not ok and "clave" in mensaje.lower()
-    c.cerrar()
-
-
 def test_clase_muy_corta_no_guarda_resumen(entorno):
     puerto, motores, *_ = entorno
     c, eventos, conexiones = cliente(puerto)
@@ -193,7 +185,7 @@ def test_clase_muy_corta_no_guarda_resumen(entorno):
 def test_si_el_pc_cambia_de_ip_lo_vuelve_a_encontrar(entorno):
     puerto, *_ = entorno
     guardadas, conexiones = [], queue.Queue()
-    config = ConfigCliente(remote_server_url="ws://127.0.0.1:1", remote_token="secreto")  # dirección vieja
+    config = ConfigCliente(remote_server_url="ws://127.0.0.1:1")  # dirección vieja
     c = Conexion(config, lambda e: None, lambda a, f: None, lambda ok, m: conexiones.put(ok),
                  buscar=lambda t: [{"host": "127.0.0.1", "port": puerto, "name": "PC"}],
                  al_nueva_direccion=guardadas.append)

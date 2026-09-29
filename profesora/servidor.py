@@ -1,7 +1,7 @@
 """Servidor de la profesora: corre en el PC de Deivid (RTX 3060) y hace todo el trabajo pesado.
 
 La app de la laptop solo graba lo que dice la alumna, lo manda aquí, y reproduce la voz de la
-profesora que le devolvemos. Mismo esquema que el Copiloto de Reuniones: WebSocket con token,
+profesora que le devolvemos. Mismo esquema que el Copiloto de Reuniones: WebSocket,
 descubrimiento por UDP y los modelos cargados una sola vez al arrancar.
 
     python -m profesora.servidor [--config config/servidor.local.json]
@@ -11,7 +11,6 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import secrets
 import threading
 from dataclasses import asdict
 from pathlib import Path
@@ -214,9 +213,9 @@ class SesionClase:
 
 
 class ServidorProfesora:
-    def __init__(self, motores: Motores, host: str, puerto: int, token: str) -> None:
+    def __init__(self, motores: Motores, host: str, puerto: int) -> None:
         self.m = motores
-        self.host, self.puerto, self.token = host, puerto, token
+        self.host, self.puerto = host, puerto
         self._servidor = None
 
     def servir(self, listo: threading.Event | None = None) -> None:
@@ -245,11 +244,6 @@ class ServidorProfesora:
             logger.warning("Conexión rechazada de %s: saludo inválido (%s)", par, exc)
             ws.close(code=4000, reason="expected hello")
             return
-        if not secrets.compare_digest(str(hola.get("token", "")), self.token):
-            logger.warning("Conexión rechazada de %s: token inválido", par)
-            ws.send(p.hola_ack(False, "token inválido"))
-            ws.close(code=4001, reason="unauthorized")
-            return
         ws.send(p.hola_ack(True))
         logger.info("Conectada: %s (%s)", hola.get("equipo"), par)
 
@@ -274,18 +268,6 @@ class ServidorProfesora:
             logger.info("Desconectada: %s", par)
 
 
-def _asegurar_token(ruta: Path, config: ConfigServidor) -> str:
-    """Si no hay token, genera uno y lo guarda en la configuración (para no tener que inventarlo)."""
-    if config.server_token:
-        return config.server_token
-    datos = json.loads(ruta.read_text(encoding="utf-8")) if ruta.exists() else asdict(config)
-    datos["server_token"] = secrets.token_urlsafe(24)
-    ruta.parent.mkdir(parents=True, exist_ok=True)
-    ruta.write_text(json.dumps(datos, ensure_ascii=False, indent=2), encoding="utf-8")
-    logger.warning("Se creó un token nuevo en %s. Pónselo también al cliente (cliente.json).", ruta)
-    return datos["server_token"]
-
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Servidor de la Profesora de Inglés")
     parser.add_argument("--config", default=str(RAIZ / "config" / "servidor.local.json"))
@@ -295,15 +277,15 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s",
                         handlers=[logging.StreamHandler(),
                                   logging.FileHandler(RAIZ / "logs" / "servidor.log", encoding="utf-8")])
-    ruta = Path(args.config)
-    config = ConfigServidor.cargar(ruta)
-    token = _asegurar_token(ruta, config)
+    config = ConfigServidor.cargar(Path(args.config))
 
     motores = Motores(config)
     motores.precargar()
     if motores.obsidian.activo:
         logger.info("Notas de Obsidian en: %s", motores.obsidian.base)
-    ServidorProfesora(motores, config.server_host, config.server_port, token).servir()
+    # Sin clave, a propósito: solo se usa en la red de la casa y el firewall solo abre el puerto
+    # para redes privadas (abrir_firewall.ps1).
+    ServidorProfesora(motores, config.server_host, config.server_port).servir()
 
 
 if __name__ == "__main__":

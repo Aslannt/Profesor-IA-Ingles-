@@ -1,6 +1,6 @@
 """Descubrimiento en la red local (tomado del Copiloto de Reuniones): la app de la laptop
-encuentra el PC servidor sin escribir la IP a mano. Es un intercambio UDP aparte, sin
-autenticación; el token se sigue validando en la conexión WebSocket.
+encuentra el PC servidor sin escribir la IP a mano. Es un intercambio UDP aparte y solo
+responde dentro de la red de la casa (el firewall solo abre el puerto en redes privadas).
 """
 
 from __future__ import annotations

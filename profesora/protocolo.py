@@ -1,6 +1,7 @@
 """Formato de los mensajes entre el servidor (PC) y el cliente (laptop). Mismo estilo que el Copiloto:
 
-1. El cliente abre el WebSocket y manda {"type": "hello", "token": ...}; el servidor responde hello_ack.
+1. El cliente abre el WebSocket y manda {"type": "hello"}; el servidor responde hello_ack.
+   (Sin clave a propósito: solo se usa en la red de la casa.)
 2. Cliente -> servidor:
    - JSON {"type": "control", "accion": ..., ...datos}
    - Binario: lo que dijo la alumna (una frase completa), audio PCM float32 mono a 16 kHz.
@@ -45,8 +46,8 @@ class ErrorProtocolo(RuntimeError):
     pass
 
 
-def hola(token: str, equipo: str) -> str:
-    return json.dumps({"type": "hello", "protocol_version": VERSION_PROTOCOLO, "token": token, "equipo": equipo})
+def hola(equipo: str) -> str:
+    return json.dumps({"type": "hello", "protocol_version": VERSION_PROTOCOLO, "equipo": equipo})
 
 
 def leer_hola(crudo: str) -> dict:

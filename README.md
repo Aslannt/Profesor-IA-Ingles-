@@ -14,7 +14,7 @@ reproduce.
  │   (detecta cuándo terminó)   │                  │ Calificación de pronunciación           │
  │ 🔊 reproduce a la profesora  │ ◀── voz ──────── │ Ollama qwen3.5:9b (el mismo del Copiloto)│
  │ 🪟 chat, práctica, resúmenes │ ◀── eventos ──── │ Voz natural (Edge): colombiana + nativa │
- └──────────────────────────────┘  token + LAN     │ Progreso + notas en Obsidian            │
+ └──────────────────────────────┘    red de casa   │ Progreso + notas en Obsidian            │
                                                     └─────────────────────────────────────────┘
 ```
 
@@ -49,12 +49,11 @@ con Dataview. Se regeneran en cada clase: mejor no editarlas a mano.
 
 ### 1. En el PC (una sola vez)
 
-1. Doble clic en **`Instalar Servidor.bat`**. Crea el entorno de Python 3.11, instala todo, descarga
+1. Doble clic en **`Instalar Servidor.bat`**. Crea el entorno de Python (3.11 a 3.14), instala todo, descarga
    `qwen3.5:9b` en Ollama (si ya lo tienes por el Copiloto no descarga nada) y abre el firewall **solo para
    la red privada** (pide permiso de administrador).
 2. Revisa **`config/servidor.local.json`**, sobre todo `obsidian_vault_path` (ya trae la ruta del Copiloto).
-3. Abre **`Iniciar Profesora (servidor).bat`**. La primera vez genera la **clave de conexión** (`server_token`)
-   y descarga el modelo de Whisper (~500 MB).
+3. Abre **`Iniciar Profesora (servidor).bat`** y deja la ventana abierta. La primera vez descarga el modelo de Whisper (~500 MB).
 4. Opcional: `instalar_autoarranque_servidor.ps1` para que arranque solo al iniciar Windows, como el Copiloto.
 
 Para probar la app en el mismo PC antes de pasarla a la laptop: `Abrir App (probar en este PC).bat`.
@@ -67,7 +66,7 @@ En el PC, en PowerShell:
 .\packaging\construir_instalador_mama.ps1
 ```
 
-Toma la IP del PC y el token del servidor y los mete **dentro** del instalador (igual que
+Toma la IP del PC y la mete **dentro** del instalador (igual que
 `build_mom_client.ps1` del Copiloto). Resultado: `dist\ProfesoraDeIngles-setup.exe`. Pásalo a la laptop y
 ábrelo: no pide permisos de administrador ni hay que configurar nada.
 Necesita [Inno Setup](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`).

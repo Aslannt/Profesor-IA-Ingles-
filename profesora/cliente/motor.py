@@ -68,7 +68,7 @@ class Conexion:
     def _abrir(self) -> ClientConnection:
         ws = self._conectar(self.config.remote_server_url, open_timeout=8, max_size=16 * 2**20)
         try:
-            ws.send(p.hola(self.config.remote_token, socket.gethostname()))
+            ws.send(p.hola(socket.gethostname()))
             ack = p.leer_hola_ack(ws.recv(timeout=8))
             if not ack.get("ok"):
                 raise RuntimeError(ack.get("error") or "El servidor rechazó la conexión.")
@@ -85,12 +85,9 @@ class Conexion:
             except Exception as exc:
                 intentos += 1
                 logger.warning("No se pudo conectar (intento %d): %s", intentos, exc)
-                if "token" in str(exc).lower():
-                    self.al_cambiar_conexion(False, "La clave de conexión no es correcta. Pídele ayuda a Deivid.")
-                else:
-                    self.al_cambiar_conexion(False, self.config.mensaje_servidor_apagado)
-                    if intentos % 3 == 0:
-                        self._buscar_de_nuevo()
+                self.al_cambiar_conexion(False, self.config.mensaje_servidor_apagado)
+                if intentos % 3 == 0:
+                    self._buscar_de_nuevo()
                 time.sleep(espera)
                 espera = min(espera * 1.5, RECONEXION_MAX)
                 continue

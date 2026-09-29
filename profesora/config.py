@@ -92,7 +92,6 @@ class ConfigServidor:
     carpeta_datos: str = "datos"
     server_host: str = "0.0.0.0"
     server_port: int = PUERTO_POR_DEFECTO
-    server_token: str = ""
 
     @classmethod
     def cargar(cls, ruta: str | Path | None = None) -> "ConfigServidor":
@@ -107,7 +106,6 @@ class ConfigServidor:
 class ConfigCliente:
     # Ej: "ws://192.168.1.50:8770". Vacío = el asistente busca el PC en la red.
     remote_server_url: str = ""
-    remote_token: str = ""
     microfono_id: str = ""  # vacío = micrófono predeterminado de Windows
 
     frecuencia_captura: int = 48000

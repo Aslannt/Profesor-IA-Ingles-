@@ -56,7 +56,7 @@ powershell -NoProfile -Command "Start-Process powershell -Verb RunAs -Wait -Argu
 
 echo.
 echo Listo. Ahora:
-echo   1. Abre "Iniciar Profesora (servidor).bat" una vez: genera la clave de conexion.
+echo   1. Abre "Iniciar Profesora (servidor).bat" y deja esa ventana abierta.
 echo   2. Ejecuta packaging\construir_instalador_mama.ps1 para crear el instalador de la laptop.
 echo   3. Opcional: instalar_autoarranque_servidor.ps1 para que arranque solo con Windows.
 pause

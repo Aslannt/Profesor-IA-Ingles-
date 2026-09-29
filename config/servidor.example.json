@@ -24,6 +24,5 @@
 
   "carpeta_datos": "datos",
   "server_host": "0.0.0.0",
-  "server_port": 8770,
-  "server_token": ""
+  "server_port": 8770
 }

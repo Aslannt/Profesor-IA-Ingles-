@@ -3,40 +3,45 @@ from __future__ import annotations
 
 import argparse
 import logging
+import socket
 import sys
 
-from PySide6.QtWidgets import QApplication, QInputDialog, QLineEdit, QMessageBox
+from PySide6.QtWidgets import QApplication, QInputDialog, QMessageBox
 
-from ..config import RAIZ, ConfigCliente, preparar_datos_usuario
+from ..config import PUERTO_POR_DEFECTO, RAIZ, ConfigCliente, preparar_datos_usuario
 from ..descubrimiento import discover_servers
 from ..energia import allow_sleep, prevent_sleep
 from .ventana import Ventana
 
 
+def _servidor_local_activo() -> bool:
+    """¿Está el servidor corriendo en este mismo PC? (cuando se prueba todo en un solo equipo)"""
+    try:
+        with socket.create_connection(("127.0.0.1", PUERTO_POR_DEFECTO), timeout=1):
+            return True
+    except OSError:
+        return False
+
+
 def _configurar_primera_vez(config: ConfigCliente, ruta) -> bool:
-    """Si la app no trae el servidor ya configurado, lo busca en la red y pide la clave."""
+    """Si la app no trae el servidor ya configurado, lo busca en la red (o en este mismo PC)."""
     cambios = False
     if not config.remote_server_url:
         encontrados = discover_servers(timeout=3.0)
         if encontrados:
             s = encontrados[0]
             config.remote_server_url = f"ws://{s['host']}:{s['port']}"
-            cambios = True
+        elif _servidor_local_activo():
+            config.remote_server_url = f"ws://127.0.0.1:{PUERTO_POR_DEFECTO}"
         else:
             url, ok = QInputDialog.getText(
                 None, "Profesora de Inglés",
                 "No encontré el computador de la profesora en la red.\n"
-                "Escribe su dirección (ej: ws://192.168.1.50:8770):")
+                "¿Está prendido y con el servidor abierto?\n\n"
+                "Si sabes su dirección, escríbela (ej: ws://192.168.1.50:8770):")
             if not ok or not url.strip():
                 return False
             config.remote_server_url = url.strip()
-            cambios = True
-    if not config.remote_token:
-        token, ok = QInputDialog.getText(None, "Profesora de Inglés", "Clave de conexión (te la da Deivid):",
-                                         QLineEdit.Password)
-        if not ok or not token.strip():
-            return False
-        config.remote_token = token.strip()
         cambios = True
     if cambios:
         config.guardar(ruta)
