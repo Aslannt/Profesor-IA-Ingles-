@@ -15,7 +15,8 @@ if not exist "%PYTHON%" (
     exit /b 1
 )
 
-powershell -NoProfile -Command "if (Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*profesora.servidor*' }) { exit 0 } else { exit 1 }" >nul 2>&1
+rem Solo procesos de Python: el propio comando de PowerShell contiene el texto buscado y se encontraba a si mismo.
+powershell -NoProfile -Command "if (Get-CimInstance Win32_Process | Where-Object { $_.Name -like 'python*' -and $_.CommandLine -like '*profesora.servidor*' }) { exit 0 } else { exit 1 }" >nul 2>&1
 if %errorlevel%==0 (
     echo El servidor de la profesora ya esta corriendo. No hace falta iniciarlo de nuevo.
     pause
