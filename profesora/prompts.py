@@ -1,7 +1,9 @@
 """Instrucciones para la IA: cómo debe enseñar y cómo hacer el resumen de la clase."""
+from __future__ import annotations
+
 import json
 
-from . import config
+from .config import ConfigServidor
 from .curriculo import texto_unidad
 
 PERSONALIDAD = """Eres {profesora}, una profesora de inglés colombiana, cálida, paciente y muy experta en enseñar \
@@ -35,8 +37,8 @@ micrófono; no la hagas sentir mal, pídele con naturalidad que lo intente otra 
 real (saludar a alguien, pedir un café, presentarse).
 6. Repaso espaciado: al inicio de cada clase repasa 2 o 3 cosas de clases anteriores antes de lo nuevo.
 7. Refuerzo positivo sincero y constante. Normaliza el error: "equivocarse es parte de aprender".
-8. Sus respuestas llegan transcritas por un reconocedor de voz en español, así que las palabras en inglés que diga \
-pueden aparecer escritas "a la española" (por ejemplo "jelou" por hello). Interprétalo con generosidad.
+8. Sus respuestas llegan transcritas por un reconocedor de voz configurado en español, así que las palabras en \
+inglés que diga pueden aparecer escritas "a la española" (por ejemplo "jelou" por hello). Interprétalo con generosidad.
 9. Si ella se desvía o quiere conversar de otra cosa, sé amable y aprovecha para enseñar algo relacionado.
 10. Una clase dura unos 15 a 20 minutos (unas 25 a 35 intervenciones tuyas). Cuando ya se haya trabajado bien lo \
 de hoy, haz un repaso final muy corto, felicítala y dile que puede tocar el botón "Terminar clase" para ver su resumen.
@@ -52,7 +54,7 @@ Palabras que ya aprendió en clases anteriores: {palabras}
 Frases que ya aprendió: {frases}
 Sonidos que le cuestan: {dificultades}
 Notas que dejaste al final de la clase anterior: {notas}
-"""
+{contexto}"""
 
 INICIO_CLASE = ("(El programa acaba de abrir una clase nueva. Saluda a {alumna} con calidez y empieza la clase "
                 "según su estado actual. Si es su primera clase, preséntate, dale confianza y enséñale su primera "
@@ -61,19 +63,25 @@ INICIO_CLASE = ("(El programa acaba de abrir una clase nueva. Saluda a {alumna} 
 PRIMERA_CLASE = "(Es su PRIMERA clase: nivel cero absoluto.)"
 
 
-def sistema_clase(progreso: dict) -> str:
+def _contexto(config: ConfigServidor) -> str:
+    return f"Contexto de su vida (para que los ejemplos le sirvan de verdad): {config.contexto_alumna}\n" \
+        if config.contexto_alumna else ""
+
+
+def sistema_clase(config: ConfigServidor, progreso: dict) -> str:
     palabras = ", ".join(p.get("en", "") for p in progreso["palabras_aprendidas"][-60:]) or "ninguna todavía"
     frases = "; ".join(progreso["frases_aprendidas"][-25:]) or "ninguna todavía"
     dificultades = "; ".join(progreso["dificultades_pronunciacion"]) or "aún no se sabe"
     notas = progreso["notas_profesora"] or (PRIMERA_CLASE if progreso["clases_completadas"] == 0 else "ninguna")
-    return (PERSONALIDAD.format(profesora=config.NOMBRE_PROFESORA, alumna=config.NOMBRE_ALUMNA)
-            + CONTEXTO_ALUMNA.format(alumna=config.NOMBRE_ALUMNA, clases=progreso["clases_completadas"],
+    return (PERSONALIDAD.format(profesora=config.nombre_profesora, alumna=config.nombre_alumna)
+            + CONTEXTO_ALUMNA.format(alumna=config.nombre_alumna, clases=progreso["clases_completadas"],
                                      unidad=texto_unidad(progreso["unidad_actual"]), palabras=palabras,
-                                     frases=frases, dificultades=dificultades, notas=notas))
+                                     frases=frases, dificultades=dificultades, notas=notas,
+                                     contexto=_contexto(config)))
 
 
-def inicio_clase() -> str:
-    return INICIO_CLASE.format(alumna=config.NOMBRE_ALUMNA)
+def inicio_clase(config: ConfigServidor) -> str:
+    return INICIO_CLASE.format(alumna=config.nombre_alumna)
 
 
 # ---------------------------------------------------------------- resumen de la clase
@@ -114,21 +122,21 @@ ESQUEMA_RESUMEN = {
 }
 
 
-def pedido_resumen(progreso: dict, transcripcion: list) -> tuple[str, str]:
+def pedido_resumen(config: ConfigServidor, progreso: dict, transcripcion: list) -> tuple[str, str]:
     """Devuelve (system, mensaje_usuario) para generar el resumen de la clase."""
-    sistema = (f"Eres {config.NOMBRE_PROFESORA}, profesora de inglés de {config.NOMBRE_ALUMNA}. "
+    sistema = (f"Eres {config.nombre_profesora}, profesora de inglés de {config.nombre_alumna}. "
                "Acabas de terminar una clase y debes escribir el resumen para ella (en español, cálido y claro, "
                "sin tecnicismos) y tus notas para la próxima clase. Responde solo con el JSON pedido.\n"
                + CONTEXTO_ALUMNA.format(
-                   alumna=config.NOMBRE_ALUMNA, clases=progreso["clases_completadas"],
+                   alumna=config.nombre_alumna, clases=progreso["clases_completadas"],
                    unidad=texto_unidad(progreso["unidad_actual"]),
                    palabras=", ".join(p.get("en", "") for p in progreso["palabras_aprendidas"]) or "ninguna",
                    frases="; ".join(progreso["frases_aprendidas"]) or "ninguna",
                    dificultades="; ".join(progreso["dificultades_pronunciacion"]) or "aún no se sabe",
-                   notas=progreso["notas_profesora"] or "ninguna"))
+                   notas=progreso["notas_profesora"] or "ninguna", contexto=_contexto(config)))
     lineas = []
     for m in transcripcion:
-        quien = config.NOMBRE_PROFESORA if m["role"] == "assistant" else config.NOMBRE_ALUMNA
+        quien = config.nombre_profesora if m["role"] == "assistant" else config.nombre_alumna
         lineas.append(f"{quien}: {m['content']}")
     usuario = ("Transcripción de la clase de hoy:\n\n" + "\n".join(lineas)
                + "\n\nIncluye en palabras_nuevas y frases_nuevas SOLO lo que se enseñó por primera vez hoy. "

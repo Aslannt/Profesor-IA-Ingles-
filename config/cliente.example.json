@@ -1,0 +1,12 @@
+{
+  "remote_server_url": "ws://IP-DEL-PC:8770",
+  "remote_token": "EL-MISMO-server_token-DEL-SERVIDOR",
+  "microfono_id": "",
+  "umbral_voz": 0.012,
+  "silencio_fin_segundos": 1.6,
+  "silencio_fin_practica_segundos": 1.2,
+  "espera_maxima_segundos": 10.0,
+  "conversacion_automatica": true,
+  "tamano_letra": 17,
+  "mensaje_servidor_apagado": "No me puedo conectar con la profesora. Revisa que el computador de Deivid esté prendido."
+}

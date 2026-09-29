@@ -1,5 +1,13 @@
-.env
 .venv/
 __pycache__/
+*.py[cod]
+.pytest_cache/
+# Configuración real de cada equipo (tokens, rutas): no se sube a git.
+config/*.local.json
+config/cliente.json
 datos/
-*.pyc
+logs/
+*.log
+build/
+dist/
+*.egg-info/

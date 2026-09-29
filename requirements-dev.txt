@@ -1,0 +1,4 @@
+-r requirements-servidor.txt
+-r requirements-cliente.txt
+pytest>=8
+pyinstaller>=6

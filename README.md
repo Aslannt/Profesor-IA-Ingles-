@@ -1,90 +1,130 @@
 # Profesora de Inglés con IA 👩🏽‍🏫
 
-Una profesora de inglés **hablada**, hecha a la medida de Katerin: empieza desde **nivel cero**, explica todo
-en **español**, se enfoca en la **pronunciación** y al final de cada clase deja un **resumen** guardado
-(palabras nuevas, cómo se pronuncian, logros y tarea).
+Una profesora de inglés **hablada** para Katerin: empieza desde **nivel cero**, explica en **español**,
+se enfoca en la **pronunciación** y deja un **resumen** de cada clase. Deivid sigue el progreso en **Obsidian**.
 
-## ¿Cómo funciona una clase?
+Funciona igual que el [Copiloto de Reuniones](https://github.com/Aslannt/copiloto-reuniones): el **PC de Deivid**
+(RTX 3060) hace todo el trabajo pesado, y la **laptop de mamá** solo tiene una app liviana que graba, envía y
+reproduce.
 
-1. Katerin toca **“Empezar la clase”**. La profe Lucía la saluda con voz y le enseña algo nuevo.
-2. Cuando la profe termina de hablar, **el micrófono se abre solo**: Katerin contesta hablando, como con una persona.
-3. Cuando la profe quiere que repita algo en inglés, la frase aparece **en grande**. Katerin puede tocar
-   **“🔊 Escuchar despacio”** las veces que quiera y luego decirla.
-4. El programa escucha su pronunciación **palabra por palabra** (verde = bien, amarillo = casi, rojo = falta)
-   y la profe le explica **qué hacer con la lengua, los labios o el aire** para mejorar ese sonido.
-5. Al tocar **“✔ Terminar clase”** se genera el resumen, que queda guardado en **“Mis clases”** (se puede
-   escuchar o imprimir). La próxima clase la profe **se acuerda** de lo que aprendió y de lo que le cuesta.
+```
+ Laptop de mamá (app de escritorio)                 PC de Deivid (servidor, RTX 3060)
+ ┌──────────────────────────────┐   WebSocket      ┌─────────────────────────────────────────┐
+ │ 🎤 graba su frase            │ ── audio ──────▶ │ Whisper (GPU): qué dijo, en ES o en EN  │
+ │   (detecta cuándo terminó)   │                  │ Calificación de pronunciación           │
+ │ 🔊 reproduce a la profesora  │ ◀── voz ──────── │ Ollama qwen3.5:9b (el mismo del Copiloto)│
+ │ 🪟 chat, práctica, resúmenes │ ◀── eventos ──── │ Voz natural (Edge): colombiana + nativa │
+ └──────────────────────────────┘  token + LAN     │ Progreso + notas en Obsidian            │
+                                                    └─────────────────────────────────────────┘
+```
 
-Otros botones: **🔁 Repetir**, **🐢 Más despacio**, **⌨️ Escribir** (si no quiere hablar), y tocar cualquier
-palabra azul en inglés la vuelve a pronunciar.
+## Cómo es una clase
 
-### Por qué así (pensado para alguien a quien “nada le ha funcionado”)
+1. Katerin abre la app y toca **"Empezar la clase"**. La profe Lucía la saluda con voz.
+2. Cuando la profe termina de hablar, **el micrófono se abre solo**. La app detecta cuándo terminó de
+   hablar (espera pausas largas, porque quien aprende se toma su tiempo pensando).
+3. Cuando debe repetir algo en inglés, la frase aparece **en grande** y puede oírla **despacio**.
+4. **Whisper** en el PC escucha la pronunciación **palabra por palabra** (verde = bien, amarillo = casi,
+   rojo = falta) y la profe le explica qué hacer con la lengua, los labios o el aire.
+5. **"Terminar clase"** genera el resumen: palabras nuevas con su pronunciación, logros y tarea.
+   La próxima clase, la profe **recuerda** lo que aprendió y lo que le cuesta.
 
-- **Todo en español**, el inglés entra poquito a poquito: máximo 4–5 cosas nuevas por clase.
-- **Turnos cortos** y siempre una pregunta al final: ella habla mucho más que en un curso normal.
-- **Dos voces**: el español lo dice una voz colombiana y el inglés una voz **nativa estadounidense, más despacio**,
-  así siempre escucha la pronunciación correcta.
-- **Trucos de pronunciación “a la española”** (water → “uárer”) y un sonido difícil a la vez
-  (la H suave, la TH, la V, las vocales largas, la S final, la -ED…).
-- **Repaso espaciado** al comenzar cada clase y un **plan de 15 unidades** (saludos → números → familia →
-  comida → rutina → pasado → conversación libre) en `app/curriculo.py`.
-- Mucho refuerzo positivo: equivocarse es parte de aprender.
+Si se cae el wifi a mitad de clase, la app se reconecta sola y **retoma donde iba**. Si el PC cambia de IP,
+la app lo vuelve a encontrar en la red.
 
-## Instalación (Windows)
+## Seguimiento en Obsidian
 
-1. Instala **Python** desde <https://www.python.org/downloads/> (marca **“Add Python to PATH”**).
-2. Descarga esta carpeta y haz doble clic en **`iniciar.bat`**.
-   - La primera vez instala todo y abre el archivo de configuración `.env` en el Bloc de notas.
-   - Pon ahí la clave de la IA (ver abajo), guarda y cierra.
-3. Se abre el navegador en `http://localhost:8000`. Usar **Google Chrome o Microsoft Edge**
-   (son los que pueden escuchar el micrófono). La primera vez hay que **permitir el micrófono**.
+En tu vault (el mismo del Copiloto), carpeta `Inglés Katerin/`:
 
-Para las siguientes clases basta con doble clic en `iniciar.bat`.
-En Mac/Linux: `./iniciar.sh`.
+- **`Progreso de Katerin.md`**: clases, palabras, unidad actual (1–15), **gráfica de pronunciación por clase**,
+  lo que más le cuesta y el plan de la profesora para la próxima clase.
+- **`Vocabulario.md`**: todas las palabras aprendidas, con su pronunciación.
+- **`Clases/2026-09-29 - Clase 001 - Saludos.md`**: resumen, cada práctica con su puntaje y lo que se oyó,
+  tarea (como checkbox) y la transcripción completa (plegada).
 
-## El “cerebro”: elige una opción en `.env`
+Las notas tienen *frontmatter* (`clase`, `unidad`, `pronunciacion`, `tags: [ingles-katerin]`), así que sirven
+con Dataview. Se regeneran en cada clase: mejor no editarlas a mano.
 
-| Opción | Calidad | Costo | Requisitos |
-|---|---|---|---|
-| **Claude** (`PROVEEDOR_IA=anthropic`) — recomendado | La mejor: paciente, natural, buen criterio pedagógico | Se paga por uso. Una clase de ~20 min cuesta aprox. **USD 0,20–0,60** con `claude-opus-5-5` (con `claude-haiku-4-5`, unos centavos) | Clave en <https://console.anthropic.com> (se recarga saldo aparte) |
-| **Ollama** (`PROVEEDOR_IA=ollama`) — 100% local | Buena, pero un modelo local se equivoca más y es más lento | Gratis | PC con 16 GB de RAM (ideal con tarjeta gráfica). Instalar <https://ollama.com> y ejecutar `ollama pull gemma3:12b` |
+## Instalación
 
-> Nota: el saldo de Claude Code (la herramienta con la que se construyó esto) **no es** el mismo saldo
-> de la API. Para usar Claude en la app hay que crear una clave en console.anthropic.com y cargarle saldo;
-> con USD 5 alcanza para muchas clases.
+### 1. En el PC (una sola vez)
 
-## La voz
+1. Doble clic en **`Instalar Servidor.bat`**. Crea el entorno de Python 3.11, instala todo, descarga
+   `qwen3.5:9b` en Ollama (si ya lo tienes por el Copiloto no descarga nada) y abre el firewall **solo para
+   la red privada** (pide permiso de administrador).
+2. Revisa **`config/servidor.local.json`**, sobre todo `obsidian_vault_path` (ya trae la ruta del Copiloto).
+3. Abre **`Iniciar Profesora (servidor).bat`**. La primera vez genera la **clave de conexión** (`server_token`)
+   y descarga el modelo de Whisper (~500 MB).
+4. Opcional: `instalar_autoarranque_servidor.ps1` para que arranque solo al iniciar Windows, como el Copiloto.
 
-| `MOTOR_VOZ` | Cómo suena | Notas |
-|---|---|---|
-| `edge` (por defecto) | **Muy natural** (voces neuronales de Microsoft). Español con acento colombiano (`es-CO-SalomeNeural`) e inglés nativo (`en-US-JennyNeural`) | Gratis, necesita internet. Otras voces: `es-CO-GonzaloNeural`, `en-US-AriaNeural`, `en-US-GuyNeural`… |
-| `kokoro` | Natural y **100% local** | Instalar aparte: `pip install kokoro soundfile` (y `espeak-ng` para el español). Más pesado |
-| `navegador` | La del navegador (más robótica) | Sin instalar nada. También se usa automáticamente si la voz falla |
+Para probar la app en el mismo PC antes de pasarla a la laptop: `Abrir App (probar en este PC).bat`.
 
-El **reconocimiento de voz** (escuchar a Katerin) lo hace el navegador Chrome/Edge, gratis.
+### 2. El instalador para la laptop
 
-## Dónde queda todo guardado
+En el PC, en PowerShell:
 
-- `datos/progreso.json`: nivel, unidad actual, palabras aprendidas, dificultades y notas de la profe.
-- `datos/clases/clase-001-AAAA-MM-DD.md`: resumen de cada clase (se puede abrir con cualquier editor).
-- `datos/clases/clase-001-AAAA-MM-DD.json`: resumen + transcripción completa.
+```powershell
+.\packaging\construir_instalador_mama.ps1
+```
 
-Para empezar de cero, borra la carpeta `datos/`.
+Toma la IP del PC y el token del servidor y los mete **dentro** del instalador (igual que
+`build_mom_client.ps1` del Copiloto). Resultado: `dist\ProfesoraDeIngles-setup.exe`. Pásalo a la laptop y
+ábrelo: no pide permisos de administrador ni hay que configurar nada.
+Necesita [Inno Setup](https://jrsoftware.org/isinfo.php) (`winget install JRSoftware.InnoSetup`).
 
-## Personalizar
+> Consejo: reserva la IP del PC en el router (DHCP) para que no cambie. Si cambia, la app la vuelve a buscar
+> sola, pero así es más rápido.
 
-- Nombres: `NOMBRE_ALUMNA` y `NOMBRE_PROFESORA` en `.env`.
-- Forma de enseñar: `app/prompts.py`.
-- Plan de estudios: `app/curriculo.py`.
+## Puertos
+
+| Puerto | Uso |
+|---|---|
+| 8770/TCP | Conexión de la app (el Copiloto usa 8765) |
+| 8771/UDP | Descubrimiento del PC en la red (el Copiloto usa 8766) |
+
+## Configuración del servidor (`config/servidor.local.json`)
+
+| Campo | Qué hace |
+|---|---|
+| `nombre_alumna`, `nombre_profesora` | Nombres |
+| `contexto_alumna` | Algo de su vida para que los ejemplos le sirvan (p. ej. sus reuniones de trabajo en inglés) |
+| `proveedor_ia` | `ollama` (local, gratis) o `anthropic` (Claude: enseña mejor, cuesta ~USD 0,20–0,60 por clase; necesita `anthropic_api_key`) |
+| `ollama_model` | `qwen3.5:9b`, el mismo del Copiloto, para que no se peleen la memoria de la GPU |
+| `whisper_model` | `small` (recomendado) o `medium` (entiende mejor los acentos, un poco más lento) |
+| `motor_voz` | `edge` (voces neuronales, muy naturales, necesita internet en el PC) o `kokoro` (100% local, instalar aparte) |
+| `voz_espanol`, `voz_ingles` | `es-CO-SalomeNeural` (colombiana) y `en-US-JennyNeural` |
+| `obsidian_vault_path`, `obsidian_carpeta` | Dónde escribir las notas. Vacío = sin Obsidian |
+
+La app de la laptop tiene su propia configuración en `%LOCALAPPDATA%\ProfesoraDeIngles\config\cliente.json`
+(sensibilidad del micrófono, tamaño de letra, etc.).
+
+## Problemas comunes
+
+- **"No me puedo conectar con la profesora"**: el PC está apagado, o el servidor no está corriendo, o el wifi
+  quedó como red **Pública** en Windows (el firewall la bloquea; `abrir_firewall.ps1` ofrece cambiarla).
+- **No detecta cuándo termina de hablar / la corta muy pronto**: en `cliente.json` ajusta `umbral_voz`
+  (más bajo = más sensible) y `silencio_fin_segundos`.
+- **La profe no tiene voz**: la voz `edge` necesita internet en el PC. El texto igual se ve en pantalla.
+- **Clase y reunión al mismo tiempo**: comparten `qwen3.5:9b`, así que Ollama no tiene que cambiar de modelo.
+- Registros: `logs/servidor.log` en el PC y `%LOCALAPPDATA%\ProfesoraDeIngles\logs\cliente.log` en la laptop.
 
 ## Estructura
 
 ```
-app/servidor.py   servidor web local (FastAPI)
-app/ia.py         conexión con Claude u Ollama
-app/voz.py        texto → voz (Edge / Kokoro), separando español e inglés
-app/prompts.py    personalidad y método de la profesora + formato del resumen
-app/curriculo.py  plan de 15 unidades desde nivel 0
-app/almacen.py    progreso y resúmenes en datos/
-static/           la página (HTML, CSS, JS): micrófono, chat, práctica de pronunciación
+profesora/servidor.py        servidor WebSocket: una clase por conexión
+profesora/transcriptor.py    Whisper (mismo manejo de CUDA que el Copiloto)
+profesora/pronunciacion.py   calificación palabra por palabra
+profesora/ia.py              Ollama o Claude
+profesora/voz.py             texto → voz (Edge/Kokoro), separando español e inglés
+profesora/prompts.py         personalidad y método de la profesora + formato del resumen
+profesora/curriculo.py       plan de 15 unidades desde nivel 0
+profesora/almacen.py         progreso y clases (fuente de verdad, en datos/)
+profesora/obsidian.py        notas en el vault
+profesora/protocolo.py       formato de los mensajes
+profesora/descubrimiento.py  encontrar el PC en la red (UDP)
+profesora/cliente/           app de la laptop: motor.py (red, micrófono, parlante) y ventana.py (PySide6)
+packaging/                   PyInstaller + Inno Setup
+tests/                       pruebas (incluida una clase completa servidor↔cliente)
 ```
+
+Pruebas: `pip install -r requirements-dev.txt` y luego `pytest`.

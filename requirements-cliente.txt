@@ -1,0 +1,5 @@
+# Laptop (solo micrófono, parlantes y ventana)
+numpy>=1.26,<3
+websockets>=13,<14
+SoundCard>=0.4.6,<0.5
+PySide6>=6.7,<7

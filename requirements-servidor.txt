@@ -1,0 +1,10 @@
+# PC servidor (el que tiene la RTX 3060)
+numpy>=1.26,<3
+websockets>=13,<14
+faster-whisper>=1.2.1,<2
+httpx>=0.27
+edge-tts>=7.0
+anthropic>=1.9
+# Runtime CUDA para Whisper en la GPU (igual que el Copiloto)
+nvidia-cublas-cu12
+nvidia-cudnn-cu12

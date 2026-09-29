@@ -1,0 +1,29 @@
+{
+  "nombre_alumna": "Katerin",
+  "nombre_profesora": "Lucía",
+  "contexto_alumna": "Tiene reuniones de trabajo en inglés por videollamada.",
+
+  "proveedor_ia": "ollama",
+  "ollama_url": "http://127.0.0.1:11434",
+  "ollama_model": "qwen3.5:9b",
+  "ollama_keep_alive": "30m",
+  "anthropic_model": "claude-opus-5-5",
+  "anthropic_api_key": "",
+
+  "whisper_model": "small",
+  "whisper_device": "auto",
+  "whisper_compute_type": "auto",
+
+  "motor_voz": "edge",
+  "voz_espanol": "es-CO-SalomeNeural",
+  "voz_ingles": "en-US-JennyNeural",
+  "velocidad_ingles": "-15%",
+
+  "obsidian_vault_path": "C:\\Users\\Aslan\\Documents\\Vault Personal",
+  "obsidian_carpeta": "Inglés Katerin",
+
+  "carpeta_datos": "datos",
+  "server_host": "0.0.0.0",
+  "server_port": 8770,
+  "server_token": ""
+}
